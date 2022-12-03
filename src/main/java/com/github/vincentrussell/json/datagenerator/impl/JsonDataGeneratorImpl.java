@@ -144,7 +144,7 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                 if (isRepeating) {
                     repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
 
-                    if (!Character.isWhitespace(currentCharAsInt) && firstNonWhitespaceCharacter == -1) {
+                    if (isFirstNonWhitespaceCharacter(firstNonWhitespaceCharacter, currentCharAsInt)) {
                         firstNonWhitespaceCharacter = currentCharAsInt;
                     }
 
@@ -268,6 +268,10 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                 tempBuffer.copyToOutputStream(outputStream);
             }
         }
+    }
+
+    private boolean isFirstNonWhitespaceCharacter(int firstNonWhitespaceCharacter, int currentCharAsInt) {
+        return !Character.isWhitespace(currentCharAsInt) && firstNonWhitespaceCharacter == -1;
     }
 
     /**
