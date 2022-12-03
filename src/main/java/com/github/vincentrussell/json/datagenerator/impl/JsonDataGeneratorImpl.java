@@ -245,29 +245,7 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                         currentCharAsInt = bufferedReader.read();
                         charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
                         tempBuffer.write(charAsUTF8String.getBytes());
-                        String repeatFunction = REPEAT;
-                        while (currentCharAsInt != '}') {
-                            repeatFunction = repeatFunction + Character.toString((char) currentCharAsInt);
-                            currentCharAsInt = bufferedReader.read();
-                            charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
-                            if (currentCharAsInt != '}') {
-                                tempBuffer.write(charAsUTF8String.getBytes());
-                            }
-                        }
-                        //)}}'
-                        tempBuffer.write((char) currentCharAsInt);
-                        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
-                        if (currentCharAsInt != '}') {
-                            throw new IllegalStateException();
-                        }
-                        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
-                        if (currentCharAsInt != '\'') {
-                            throw new IllegalStateException();
-                        }
-                        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
-                        if (currentCharAsInt != ',') {
-                            throw new IllegalStateException();
-                        }
+                        String repeatFunction = findRepeatingFunction(currentCharAsInt, bufferedReader, tempBuffer);
                         repeatTimes = parseRepeats(repeatFunction);
                         tempBuffer.setLength(
                                 tempBuffer.getLength() - repeatFunction.length() - 4);
@@ -290,6 +268,48 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                 tempBuffer.copyToOutputStream(outputStream);
             }
         }
+    }
+
+    /**
+     *
+     * @param currentCharAsInt
+     * @param bufferedReader
+     * @param tempBuffer
+     * @return
+     * @throws IOException if reading from bufferedReader causes issue
+     * @throws IllegalStateException if syntax is wrong
+     */
+    private String findRepeatingFunction(int currentCharAsInt, BufferedReader bufferedReader, ByteArrayBackupToFileOutputStream tempBuffer) throws IOException, IllegalStateException {
+        String repeatFunction = REPEAT;
+        String charAsUTF8String;
+        while (currentCharAsInt != '}') {
+            repeatFunction = repeatFunction + Character.toString((char) currentCharAsInt);
+            currentCharAsInt = bufferedReader.read();
+            charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
+            if (currentCharAsInt != '}') {
+                tempBuffer.write(charAsUTF8String.getBytes());
+            }
+        }
+        //)}}'
+
+        /*
+         * Below piece of code checks whether the repeat function ended with
+         * "}}',"
+         */
+        tempBuffer.write((char) currentCharAsInt);
+        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
+        if (currentCharAsInt != '}') {
+            throw new IllegalStateException();
+        }
+        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
+        if (currentCharAsInt != '\'') {
+            throw new IllegalStateException();
+        }
+        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
+        if (currentCharAsInt != ',') {
+            throw new IllegalStateException();
+        }
+        return repeatFunction;
     }
 
     /**
