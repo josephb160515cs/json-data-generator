@@ -138,25 +138,25 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
             int firstNonWhitespaceCharacter = -1;
             int xmlTag = 0;
             String xmlRepeatTag = "";
-            int i;
-            while ((i = bufferedReader.read()) != -1) {
-                String charAsUTF8String = Character.valueOf((char) i).toString();
+            int currentCharAsInt;
+            while ((currentCharAsInt = bufferedReader.read()) != -1) {
+                String charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
                 if (isRepeating) {
                     repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
 
-                    if (!Character.isWhitespace(i) && firstNonWhitespaceCharacter == -1) {
-                        firstNonWhitespaceCharacter = i;
+                    if (!Character.isWhitespace(currentCharAsInt) && firstNonWhitespaceCharacter == -1) {
+                        firstNonWhitespaceCharacter = currentCharAsInt;
                     }
 
-                    if ('{' == i) {
+                    if ('{' == currentCharAsInt) {
                         bracketCount++;
-                    } else if ('}' == i || (']' == i) && bracketCount == 0) {
+                    } else if ('}' == currentCharAsInt || (']' == currentCharAsInt) && bracketCount == 0) {
                         bracketCount--;
                         if (bracketCount == 0 && xmlTag == 0) {
                             bufferedReader.mark(1);
-                            i = bufferedReader.read();
-                            charAsUTF8String = Character.valueOf((char) i).toString();
-                            if (i == firstNonWhitespaceCharacter) {
+                            currentCharAsInt = bufferedReader.read();
+                            charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
+                            if (currentCharAsInt == firstNonWhitespaceCharacter) {
                                 repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
                             } else {
                                 bufferedReader.reset();
@@ -199,14 +199,14 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                             }
                         }
                     }
-                    if ('<' == i && xmlTag == 0) {
-                        i = bufferedReader.read();
-                        while ('>' != i && i != -1) {
-                            charAsUTF8String = Character.valueOf((char) i).toString();
-                            xmlRepeatTagList.add((char) i);
+                    if ('<' == currentCharAsInt && xmlTag == 0) {
+                        currentCharAsInt = bufferedReader.read();
+                        while ('>' != currentCharAsInt && currentCharAsInt != -1) {
+                            charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
+                            xmlRepeatTagList.add((char) currentCharAsInt);
                             repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
-                            i = bufferedReader.read();
-                            charAsUTF8String = Character.valueOf((char) i).toString();
+                            currentCharAsInt = bufferedReader.read();
+                            charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
                         }
                         xmlTag++;
                         repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
@@ -235,37 +235,37 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                     }
                 } else {
                     tempBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
-                    lastCharQueue.add((char) i);
+                    lastCharQueue.add((char) currentCharAsInt);
                 }
                 if ((lastCharQueue.peek() != null && lastCharQueue.peek().equals('\''))
                         && REPEAT.equals(readAsString(lastCharQueue))) {
                     tempBuffer.mark();
                     bufferedReader.mark(DEFAULT_READ_AHEAD_LIMIT);
                     try {
-                        i = bufferedReader.read();
-                        charAsUTF8String = Character.valueOf((char) i).toString();
+                        currentCharAsInt = bufferedReader.read();
+                        charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
                         tempBuffer.write(charAsUTF8String.getBytes());
                         String repeatFunction = REPEAT;
-                        while (i != '}') {
-                            repeatFunction = repeatFunction + Character.toString((char) i);
-                            i = bufferedReader.read();
-                            charAsUTF8String = Character.valueOf((char) i).toString();
-                            if (i != '}') {
+                        while (currentCharAsInt != '}') {
+                            repeatFunction = repeatFunction + Character.toString((char) currentCharAsInt);
+                            currentCharAsInt = bufferedReader.read();
+                            charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
+                            if (currentCharAsInt != '}') {
                                 tempBuffer.write(charAsUTF8String.getBytes());
                             }
                         }
                         //)}}'
-                        tempBuffer.write((char) i);
-                        tempBuffer.write((char) (i = bufferedReader.read()));
-                        if (i != '}') {
+                        tempBuffer.write((char) currentCharAsInt);
+                        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
+                        if (currentCharAsInt != '}') {
                             throw new IllegalStateException();
                         }
-                        tempBuffer.write((char) (i = bufferedReader.read()));
-                        if (i != '\'') {
+                        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
+                        if (currentCharAsInt != '\'') {
                             throw new IllegalStateException();
                         }
-                        tempBuffer.write((char) (i = bufferedReader.read()));
-                        if (i != ',') {
+                        tempBuffer.write((char) (currentCharAsInt = bufferedReader.read()));
+                        if (currentCharAsInt != ',') {
                             throw new IllegalStateException();
                         }
                         repeatTimes = parseRepeats(repeatFunction);
