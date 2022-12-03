@@ -139,7 +139,7 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
             int xmlTag = 0;
             String xmlRepeatTag = "";
             int currentCharAsInt;
-            while ((currentCharAsInt = bufferedReader.read()) != -1) {
+            while (hasReachedEOF(currentCharAsInt = bufferedReader.read())) {
                 String charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
                 if (isRepeating) {
                     repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
@@ -201,7 +201,7 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                     }
                     if ('<' == currentCharAsInt && xmlTag == 0) {
                         currentCharAsInt = bufferedReader.read();
-                        while ('>' != currentCharAsInt && currentCharAsInt != -1) {
+                        while ('>' != currentCharAsInt && !hasReachedEOF(currentCharAsInt)) {
                             charAsUTF8String = Character.valueOf((char) currentCharAsInt).toString();
                             xmlRepeatTagList.add((char) currentCharAsInt);
                             repeatBuffer.write(charAsUTF8String.getBytes(Charsets.UTF_8));
@@ -290,6 +290,16 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
                 tempBuffer.copyToOutputStream(outputStream);
             }
         }
+    }
+
+    /**
+     *
+     * @param currentCharAsInt current char represented as number
+     * @return true if current char represented as number is -1 meaning it has
+     *         reached EOF
+     */
+    private boolean hasReachedEOF(int currentCharAsInt) {
+        return currentCharAsInt == -1;
     }
 
     private void copyRepeatStream(final int repeatTimes, final ByteArrayBackupToFileOutputStream repeatBuffer,
