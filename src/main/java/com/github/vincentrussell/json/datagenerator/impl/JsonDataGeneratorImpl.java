@@ -357,10 +357,8 @@ public class JsonDataGeneratorImpl implements JsonDataGenerator {
     private void setQueueCharacters(final CircularFifoQueue<Character> characters,
         final String string) {
         characters.clear();
-        char[] charArray = string.toCharArray();
-        for (int i = 0; i < charArray.length; i++) {
-            characters.add(charArray[i]);
-        }
+
+        string.codePoints().mapToObj(c -> (char) c).forEach(characters::add);
     }
 
     private void handleNestedFunctions(final InputStream inputStream,
